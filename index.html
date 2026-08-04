@@ -20,6 +20,10 @@
     --red: #FF3B30;
     --green: #34C759;
     --separator: #E5E5EA;
+    --glass-bg: rgba(255,255,255,0.5);
+    --glass-bg-strong: rgba(255,255,255,0.68);
+    --glass-border: rgba(255,255,255,0.75);
+    --glass-blur: blur(24px) saturate(180%);
   }
 
   *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -27,8 +31,22 @@
   html, body{
     height: 100%;
     margin: 0;
-    background: var(--bg);
+    background:
+      radial-gradient(circle at 15% 0%, rgba(0,122,255,0.16), transparent 45%),
+      radial-gradient(circle at 100% 20%, rgba(255,59,48,0.10), transparent 40%),
+      radial-gradient(circle at 20% 100%, rgba(52,199,89,0.10), transparent 45%),
+      var(--bg);
+    background-attachment: fixed;
     overscroll-behavior: none;
+  }
+
+  /* subtle specular highlight for glass panels — a soft light glint along the top edge */
+  .glass::before{
+    content: "";
+    position: absolute;
+    left: 8%; right: 8%; top: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.9), transparent);
   }
 
   body{
@@ -45,6 +63,31 @@
     flex-shrink: 0;
     background: var(--bg);
   }
+  .header-top{
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .header-actions{
+    display: flex;
+    gap: 10px;
+    margin-top: 2px;
+  }
+  .icon-btn{
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.55);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    color: var(--blue);
+    display:flex; align-items:center; justify-content:center;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(31,38,71,0.1);
+  }
+  .icon-btn:active{ transform: scale(0.92); }
+  .icon-btn svg{ width: 19px; height: 19px; }
   .header h1{
     font-size: 34px;
     font-weight: 800;
@@ -80,13 +123,17 @@
   }
 
   ul#list{
+    position: relative;
     list-style: none;
     margin: 0;
     padding: 0;
-    background: var(--card);
-    border-radius: 16px;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 22px;
     overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    box-shadow: 0 8px 24px rgba(31,38,71,0.08);
   }
 
   li.item{
@@ -94,7 +141,7 @@
     align-items: center;
     gap: 12px;
     padding: 14px 14px;
-    border-bottom: 1px solid var(--separator);
+    border-bottom: 1px solid rgba(28,28,30,0.07);
     animation: dropIn .3s ease;
   }
   li.item:last-child{ border-bottom: none; }
@@ -156,36 +203,40 @@
   }
   .del:active{ background: rgba(0,0,0,0.05); }
 
-  /* bottom control dock */
+  /* bottom control dock — floating glass pill */
   .dock{
     position: fixed;
-    left: 0; right: 0; bottom: 0;
-    padding: 14px 20px calc(18px + env(safe-area-inset-bottom,0)) 20px;
-    background: rgba(242,242,247,0.85);
-    -webkit-backdrop-filter: blur(20px);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid var(--separator);
-    display: flex;
+    left: 16px; right: 16px;
+    bottom: calc(14px + env(safe-area-inset-bottom,0));
+    padding: 10px 22px;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: 34px;
+    box-shadow: 0 10px 30px rgba(31,38,71,0.14);
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    justify-content: center;
-    gap: 26px;
+    z-index: 10;
   }
 
   .type-btn{
-    width: 52px; height: 52px;
+    justify-self: start;
+    width: 40px; height: 40px;
     border-radius: 50%;
-    border: none;
-    background: var(--card);
-    color: var(--blue);
-    font-size: 26px;
+    border: 1px solid rgba(255,255,255,0.6);
+    background: rgba(255,255,255,0.55);
+    color: var(--text-secondary);
+    font-size: 20px;
     font-weight: 700;
     display:flex; align-items:center; justify-content:center;
     cursor: pointer;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.12);
   }
-  .type-btn:active{ transform: scale(0.93); }
+  .type-btn:active{ transform: scale(0.9); }
 
   .mic-wrap{
+    justify-self: center;
     position: relative;
     width: 92px; height: 92px;
     display: flex; align-items: center; justify-content: center;
@@ -222,12 +273,15 @@
     position: relative;
     width: 76px; height: 76px;
     border-radius: 50%;
-    border: 4px solid #fff;
-    background: var(--red);
-    box-shadow: 0 2px 10px rgba(255,59,48,0.4);
+    border: 3px solid rgba(255,255,255,0.85);
+    background: radial-gradient(circle at 32% 26%, #ff6f63, var(--red) 65%);
+    box-shadow: 0 4px 16px rgba(255,59,48,0.45), inset 0 1px 2px rgba(255,255,255,0.6);
     display:flex; align-items:center; justify-content:center;
     cursor: pointer;
     transition: transform .12s ease, border-radius .2s ease;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
   }
   #micBtn:active{ transform: scale(0.94); }
   #micBtn .icon-mic{ width: 30px; height: 30px; }
@@ -241,10 +295,46 @@
   .mic-wrap.listening #micBtn .icon-mic{ display: none; }
   .mic-wrap.listening #micBtn .icon-stop{ display: block; }
 
+  .undo-toast{
+    position: fixed;
+    left: 16px; right: 16px;
+    bottom: 152px;
+    z-index: 15;
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 12px 12px 18px;
+    background: rgba(28,28,30,0.78);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    box-shadow: 0 10px 26px rgba(0,0,0,0.25);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    animation: dropIn .25s ease;
+  }
+  .undo-toast.show{ display: flex; }
+  .undo-toast button{
+    flex-shrink: 0;
+    border: none;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 800;
+    padding: 9px 16px;
+    border-radius: 14px;
+    cursor: pointer;
+  }
+  .undo-toast button:active{ background: rgba(255,255,255,0.3); }
+
   .status{
     position: fixed;
     left: 16px; right: 16px;
-    bottom: 122px;
+    bottom: 152px;
+    z-index: 15;
     text-align: center;
     pointer-events: none;
     min-height: 24px;
@@ -257,27 +347,37 @@
     font-size: 18px;
     font-weight: 600;
     color: var(--text);
-    background: var(--card);
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
     padding: 10px 18px;
     border-radius: 18px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    box-shadow: 0 6px 18px rgba(31,38,71,0.12);
   }
   .status-bubble.show{ display: block; }
-  .status-bubble.warn{ color: #B45309; background: #FFF3CD; font-weight: 700; }
-  .status-bubble.hint{ color: var(--text-secondary); background: transparent; box-shadow: none; font-weight: 600; }
+  .status-bubble.warn{ color: #B45309; background: rgba(255,243,205,0.85); font-weight: 700; }
+  .status-bubble.hint{ color: var(--text-secondary); background: transparent; box-shadow: none; border-color: transparent; font-weight: 600; }
 
   .modal-back{
     position: fixed; inset:0;
-    background: rgba(0,0,0,0.35);
+    background: rgba(20,20,30,0.28);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
     display:none;
     align-items: flex-end;
     z-index: 20;
   }
   .modal-back.show{ display:flex; }
   .modal{
+    position: relative;
     width: 100%;
-    background: var(--bg);
-    border-radius: 20px 20px 0 0;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-bottom: none;
+    border-radius: 28px 28px 0 0;
     padding: 20px 18px calc(20px + env(safe-area-inset-bottom,0)) 18px;
   }
   .modal h3{ margin: 0 0 12px 0; font-size: 20px; font-weight: 800; color: var(--text); }
@@ -321,8 +421,29 @@
 <body>
 
   <div class="header">
-    <h1>Блокнот</h1>
-    <div class="date" id="dateLine"></div>
+    <div class="header-top">
+      <div>
+        <h1>Блокнот</h1>
+        <div class="date" id="dateLine"></div>
+      </div>
+      <div class="header-actions">
+        <button class="icon-btn" id="exportBtn" aria-label="Сохранить копию в файл">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 4v11"></path>
+            <path d="M8 11l4 4 4-4"></path>
+            <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path>
+          </svg>
+        </button>
+        <button class="icon-btn" id="importBtn" aria-label="Загрузить из файла">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 15V4"></path>
+            <path d="M8 8l4-4 4 4"></path>
+            <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"></path>
+          </svg>
+        </button>
+        <input type="file" id="importFile" accept="application/json" style="display:none">
+      </div>
+    </div>
   </div>
 
   <div class="page">
@@ -333,14 +454,19 @@
       <span class="big">🎙️</span>
       Пока пусто.<br>Нажмите на кнопку внизу и скажите, что записать.
     </div>
-    <ul id="list"></ul>
+    <ul id="list" class="glass"></ul>
+  </div>
+
+  <div class="undo-toast glass" id="undoToast">
+    <span>Запись удалена</span>
+    <button id="undoBtn">Отменить</button>
   </div>
 
   <div class="status">
     <div class="status-bubble" id="status"></div>
   </div>
 
-  <div class="dock">
+  <div class="dock glass">
     <button class="type-btn" id="addBtn" aria-label="Добавить текстом">+</button>
     <div class="mic-wrap" id="micWrap">
       <div class="ring r1"></div>
@@ -356,11 +482,10 @@
         <div class="icon-stop"></div>
       </button>
     </div>
-    <div style="width:52px"></div>
   </div>
 
   <div class="modal-back" id="modalBack">
-    <div class="modal">
+    <div class="modal glass">
       <h3 id="modalTitle">Новая запись</h3>
       <textarea id="manualText" placeholder="Напишите здесь..."></textarea>
       <div class="row">
@@ -381,6 +506,11 @@
 
   const STORAGE_KEY = 'mom-notepad-entries-v1';
   let entries = [];
+  let hiddenIds = new Set();
+
+  function vibrate(pattern){
+    try{ if(navigator.vibrate) navigator.vibrate(pattern); }catch(e){}
+  }
 
   try{
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -398,12 +528,15 @@
 
   function render(){
     listEl.innerHTML = '';
-    if(entries.length === 0){
+    const visible = entries.filter(e => !hiddenIds.has(e.id));
+    if(visible.length === 0){
       emptyState.style.display = 'block';
+      listEl.style.display = 'none';
     } else {
       emptyState.style.display = 'none';
+      listEl.style.display = '';
     }
-    entries.forEach(entry => {
+    visible.forEach(entry => {
       const li = document.createElement('li');
       li.className = 'item' + (entry.done ? ' done' : '');
       li.dataset.id = entry.id;
@@ -430,7 +563,7 @@
       del.className = 'del';
       del.innerHTML = '×';
       del.setAttribute('aria-label', 'Удалить');
-      del.onclick = () => removeEntry(entry.id);
+      del.onclick = () => requestDelete(entry.id);
 
       li.appendChild(check);
       li.appendChild(textWrap);
@@ -445,11 +578,12 @@
     entries.unshift({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), text, ts: Date.now(), done: false });
     save();
     render();
+    vibrate(35);
   }
 
   function toggleDone(id){
     const e = entries.find(x => x.id === id);
-    if(e){ e.done = !e.done; save(); render(); }
+    if(e){ e.done = !e.done; save(); render(); vibrate(15); }
   }
 
   function removeEntry(id){
@@ -457,12 +591,95 @@
     save(); render();
   }
 
+  // ---- Soft delete with undo (protects against an accidental tap) ----
+  const undoToast = document.getElementById('undoToast');
+  let deleteTimer = null;
+  let lastDeletedId = null;
+
+  function requestDelete(id){
+    hiddenIds.add(id);
+    render();
+    vibrate([20, 60, 20]);
+    lastDeletedId = id;
+    undoToast.classList.add('show');
+    if(deleteTimer) clearTimeout(deleteTimer);
+    deleteTimer = setTimeout(() => {
+      hiddenIds.delete(id);
+      removeEntry(id);
+      lastDeletedId = null;
+      undoToast.classList.remove('show');
+    }, 4000);
+  }
+
+  document.getElementById('undoBtn').onclick = () => {
+    if(deleteTimer){ clearTimeout(deleteTimer); deleteTimer = null; }
+    if(lastDeletedId){ hiddenIds.delete(lastDeletedId); lastDeletedId = null; render(); }
+    undoToast.classList.remove('show');
+    vibrate(20);
+  };
+
   function setDate(){
     const d = new Date();
     dateLine.textContent = d.toLocaleDateString('ru-RU', { weekday:'long', day:'numeric', month:'long' });
   }
   setDate();
   render();
+
+  // ---- Export / Import (backup between app updates or devices) ----
+  document.getElementById('exportBtn').onclick = () => {
+    const payload = { app: 'mom-notepad', version: 1, exportedAt: Date.now(), entries };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `blocknot-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    setStatus('Файл сохранён', 'hint');
+    setTimeout(() => setStatus(''), 2200);
+  };
+
+  const importFile = document.getElementById('importFile');
+  document.getElementById('importBtn').onclick = () => importFile.click();
+  importFile.onchange = (e) => {
+    const file = e.target.files[0];
+    importFile.value = '';
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        const incoming = Array.isArray(parsed) ? parsed : (Array.isArray(parsed.entries) ? parsed.entries : null);
+        if(!incoming) throw new Error('bad format');
+        const existingIds = new Set(entries.map(x => x.id));
+        let added = 0;
+        incoming.forEach(item => {
+          if(item && typeof item.text === 'string' && item.text.trim() && !existingIds.has(item.id)){
+            const id = item.id || (Date.now() + '-' + Math.random().toString(36).slice(2, 7));
+            entries.push({
+              id,
+              text: item.text,
+              ts: typeof item.ts === 'number' ? item.ts : Date.now(),
+              done: !!item.done
+            });
+            existingIds.add(id);
+            added++;
+          }
+        });
+        entries.sort((a, b) => b.ts - a.ts);
+        save();
+        render();
+        setStatus(added > 0 ? `Восстановлено записей: ${added}` : 'В файле нет новых записей', 'hint');
+      }catch(err){
+        setStatus('Не удалось прочитать файл', 'warn');
+      }
+      setTimeout(() => setStatus(''), 2600);
+    };
+    reader.readAsText(file);
+  };
 
   // ---- Add / edit modal ----
   const modalBack = document.getElementById('modalBack');
@@ -588,56 +805,64 @@
     micBtn.disabled = true;
     micBtn.style.opacity = '0.4';
   } else {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'ru-RU';
-    recognition.continuous = true;
-    recognition.interimResults = true;
 
-    recognition.onresult = (event) => {
-      let finalText = '';
-      let interimText = '';
-      for(let i = event.resultIndex; i < event.results.length; i++){
-        const chunk = event.results[i][0].transcript;
-        if(event.results[i].isFinal){
-          finalText += chunk;
-        } else {
-          interimText += chunk;
+    function createRecognition(){
+      const r = new SpeechRecognition();
+      r.lang = 'ru-RU';
+      r.continuous = true;
+      r.interimResults = true;
+
+      r.onresult = (event) => {
+        let finalText = '';
+        let interimText = '';
+        for(let i = event.resultIndex; i < event.results.length; i++){
+          const chunk = event.results[i][0].transcript;
+          if(event.results[i].isFinal){
+            finalText += chunk;
+          } else {
+            interimText += chunk;
+          }
         }
-      }
-      if(finalText.trim()){
-        addEntry(finalText);
-        interimActive = false;
-        setStatus('Слушаю...', 'hint');
-      } else if(interimText.trim()){
-        interimActive = true;
-        showingWarning = false;
-        setStatus(interimText);
-      } else {
-        interimActive = false;
-      }
-    };
+        if(finalText.trim()){
+          addEntry(finalText);
+          interimActive = false;
+          setStatus('Слушаю...', 'hint');
+        } else if(interimText.trim()){
+          interimActive = true;
+          showingWarning = false;
+          setStatus(interimText);
+        } else {
+          interimActive = false;
+        }
+      };
 
-    recognition.onerror = (event) => {
-      if(event.error === 'not-allowed' || event.error === 'service-not-allowed'){
-        setStatus('Нет доступа к микрофону. Разрешите доступ в настройках телефона.', 'warn');
-        shouldContinue = false;
-        stopListening();
-      } else if(event.error === 'no-speech'){
-        // silence — meter already shows the hearing-trouble hint if it persists
-      }
-    };
+      r.onerror = (event) => {
+        if(event.error === 'not-allowed' || event.error === 'service-not-allowed'){
+          setStatus('Нет доступа к микрофону. Разрешите доступ в настройках телефона.', 'warn');
+          shouldContinue = false;
+          stopListening();
+        }
+        // 'no-speech' etc: the level meter already shows the hearing-trouble hint if it persists
+      };
 
-    recognition.onend = () => {
-      if(shouldContinue){
-        try{ recognition.start(); }catch(e){}
-      } else {
-        listening = false;
-        micWrap.classList.remove('listening');
-        setStatus('');
-      }
-    };
+      r.onend = () => {
+        if(shouldContinue){
+          // Restart with a brand-new instance — reusing the same one here is
+          // what caused the mic to silently stop hearing anything on Android.
+          recognition = createRecognition();
+          try{ recognition.start(); }catch(e){}
+        } else {
+          listening = false;
+          micWrap.classList.remove('listening');
+          setStatus('');
+        }
+      };
+
+      return r;
+    }
 
     function startListening(){
+      recognition = createRecognition();
       try{
         recognition.start();
         listening = true;
@@ -654,7 +879,9 @@
       micWrap.classList.remove('listening');
       setStatus('');
       stopMeter();
-      try{ recognition.stop(); }catch(e){}
+      if(recognition){
+        try{ recognition.stop(); }catch(e){}
+      }
     }
 
     micBtn.addEventListener('click', () => {
@@ -666,7 +893,7 @@
   // ---- Service worker ----
   if('serviceWorker' in navigator){
     window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js').catch(()=>{});
+      navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' }).catch(()=>{});
     });
   }
 })();
