@@ -450,7 +450,7 @@
     </div>
     <div class="empty" id="emptyState">
       <span class="big">🎙️</span>
-      Пока пусто.<br>Зажмите кнопку внизу, скажите и отпустите.
+      Пока пусто.<br>Нажмите на кнопку внизу и скажите, что записать.
     </div>
     <ul id="list" class="glass"></ul>
   </div>
@@ -471,7 +471,7 @@
       <div class="ring r2"></div>
       <div class="ring r3"></div>
       <div class="level-ring" id="levelRing"></div>
-      <button id="micBtn" aria-label="Зажмите и говорите">
+      <button id="micBtn" aria-label="Записать голосом">
         <svg class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"></path>
           <path d="M19 11a7 7 0 0 1-14 0"></path>
@@ -872,24 +872,10 @@
       try{ recognition.stop(); }catch(e){}
     }
 
-    let isHeld = false;
-
-    function releaseHold(){
-      if(!isHeld) return;
-      isHeld = false;
-      stopListening();
-    }
-
-    micBtn.addEventListener('pointerdown', (e) => {
-      e.preventDefault();
-      if(listening) return;
-      isHeld = true;
-      try{ micBtn.setPointerCapture(e.pointerId); }catch(err){}
-      startListening();
+    micBtn.addEventListener('click', () => {
+      if(listening){ stopListening(); }
+      else{ startListening(); }
     });
-    micBtn.addEventListener('pointerup', releaseHold);
-    micBtn.addEventListener('pointercancel', releaseHold);
-    micBtn.addEventListener('pointerleave', releaseHold);
   }
 
   // ---- Service worker ----
