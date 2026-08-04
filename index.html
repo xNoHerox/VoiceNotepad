@@ -257,17 +257,6 @@
     0%{ transform: scale(0.72); opacity: .45; }
     100%{ transform: scale(1.7); opacity: 0; }
   }
-  /* live level ring — scales in real time with mic volume, so it's obvious when it hears you */
-  .level-ring{
-    position: absolute;
-    inset: 0;
-    border-radius: 50%;
-    background: var(--red);
-    opacity: 0;
-    transform: scale(0.8);
-    transition: transform .06s linear, opacity .06s linear;
-    pointer-events: none;
-  }
 
   #micBtn{
     position: relative;
@@ -472,7 +461,6 @@
       <div class="ring r1"></div>
       <div class="ring r2"></div>
       <div class="ring r3"></div>
-      <div class="level-ring" id="levelRing"></div>
       <button id="micBtn" aria-label="Записать голосом">
         <svg class="icon-mic" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"></path>
@@ -721,7 +709,6 @@
   modalBack.onclick = (e) => { if(e.target === modalBack) modalBack.classList.remove('show'); };
 
   // ---- Status bubble helper ----
-  const levelRing = document.getElementById('levelRing');
   function setStatus(text, mode){
     // mode: '' (calm hint), 'warn' (hearing trouble), or omit for live transcript
     statusEl.classList.remove('warn', 'hint');
@@ -733,64 +720,6 @@
       statusEl.textContent = '';
       statusEl.classList.remove('show');
     }
-  }
-
-  // ---- Microphone level meter (visual proof it's actually hearing her) ----
-  let audioCtx = null, analyser = null, micStream = null, meterRaf = null;
-  let quietSince = null;
-  let showingWarning = false;
-
-  async function startMeter(){
-    try{
-      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      const source = audioCtx.createMediaStreamSource(micStream);
-      analyser = audioCtx.createAnalyser();
-      analyser.fftSize = 512;
-      analyser.smoothingTimeConstant = 0.6;
-      source.connect(analyser);
-      const data = new Uint8Array(analyser.frequencyBinCount);
-      quietSince = Date.now();
-      showingWarning = false;
-
-      const tick = () => {
-        analyser.getByteFrequencyData(data);
-        let sum = 0;
-        for(let i = 0; i < data.length; i++) sum += data[i];
-        const avg = sum / data.length;
-        const level = Math.min(1, avg / 45);
-
-        levelRing.style.opacity = (0.15 + level * 0.55).toFixed(2);
-        levelRing.style.transform = `scale(${(0.85 + level * 0.9).toFixed(2)})`;
-
-        if(avg < 3){
-          if(!quietSince) quietSince = Date.now();
-          if(Date.now() - quietSince > 3500 && !interimActive){
-            showingWarning = true;
-            setStatus('Не слышу вас... Говорите громче, ближе к телефону', 'warn');
-          }
-        } else {
-          quietSince = Date.now();
-          if(showingWarning && !interimActive){
-            showingWarning = false;
-            setStatus('Слушаю...', 'hint');
-          }
-        }
-        meterRaf = requestAnimationFrame(tick);
-      };
-      tick();
-    }catch(e){
-      // no separate level meter available — recognition can still work on its own
-    }
-  }
-
-  function stopMeter(){
-    if(meterRaf) cancelAnimationFrame(meterRaf);
-    meterRaf = null;
-    if(micStream){ micStream.getTracks().forEach(t => t.stop()); micStream = null; }
-    if(audioCtx){ audioCtx.close().catch(()=>{}); audioCtx = null; }
-    levelRing.style.opacity = 0;
-    levelRing.style.transform = 'scale(0.8)';
   }
 
   // ---- Voice recognition ----
@@ -829,7 +758,6 @@
           setStatus('Слушаю...', 'hint');
         } else if(interimText.trim()){
           interimActive = true;
-          showingWarning = false;
           setStatus(interimText);
         } else {
           interimActive = false;
@@ -841,8 +769,9 @@
           setStatus('Нет доступа к микрофону. Разрешите доступ в настройках телефона.', 'warn');
           shouldContinue = false;
           stopListening();
+        } else if(event.error === 'no-speech' && !interimActive){
+          setStatus('Не слышу вас... Говорите громче, ближе к телефону', 'warn');
         }
-        // 'no-speech' etc: the level meter already shows the hearing-trouble hint if it persists
       };
 
       r.onend = () => {
@@ -850,7 +779,10 @@
           // Restart with a brand-new instance — reusing the same one here is
           // what caused the mic to silently stop hearing anything on Android.
           recognition = createRecognition();
-          try{ recognition.start(); }catch(e){}
+          try{
+            recognition.start();
+            setStatus('Слушаю...', 'hint');
+          }catch(e){}
         } else {
           listening = false;
           micWrap.classList.remove('listening');
@@ -869,7 +801,6 @@
         shouldContinue = true;
         micWrap.classList.add('listening');
         setStatus('Слушаю...', 'hint');
-        startMeter();
       }catch(e){}
     }
 
@@ -878,7 +809,6 @@
       listening = false;
       micWrap.classList.remove('listening');
       setStatus('');
-      stopMeter();
       if(recognition){
         try{ recognition.stop(); }catch(e){}
       }
