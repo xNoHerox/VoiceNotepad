@@ -218,6 +218,7 @@
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
+    z-index: 10;
   }
 
   .type-btn{
@@ -297,7 +298,7 @@
   .undo-toast{
     position: fixed;
     left: 16px; right: 16px;
-    bottom: 122px;
+    bottom: 152px;
     z-index: 15;
     display: none;
     align-items: center;
@@ -332,7 +333,8 @@
   .status{
     position: fixed;
     left: 16px; right: 16px;
-    bottom: 122px;
+    bottom: 152px;
+    z-index: 15;
     text-align: center;
     pointer-events: none;
     min-height: 24px;
