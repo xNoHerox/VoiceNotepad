@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mom-notepad-v3';
+const CACHE_NAME = 'mom-notepad-v4';
 const ASSETS = [
   './',
   './index.html',
